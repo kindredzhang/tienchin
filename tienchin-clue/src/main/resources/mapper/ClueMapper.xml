@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjh.tienchin.clue.mapper.ClueMapper">
+
+
+    <select id="selectClueList" resultType="com.zjh.tienchin.clue.domain.vo.ClueSummary" parameterType="ClueVO">
+        select tc.clue_id,tc.name,tch.channel_name,tc.phone,tc.status,tc.create_time,tc.create_by,ta.user_name as owner,tc.next_time from tienchin_clue tc left join tienchin_channel tch on tc.channel_id=tch.channel_id left join tienchin_assignment ta on tc.clue_id=ta.assign_id and ta.latest=true where tc.del_flag=0 and ta.type=0
+        <if test="name!=null">
+            and tc.name=#{name}
+        </if>
+        <if test="phone!=null">
+            and tc.phone=#{phone}
+        </if>
+        <if test="channelId!=null">
+            and tc.channel_id=#{channelId}
+        </if>
+        <if test="status!=null">
+            and tc.status=#{status}
+        </if>
+        <if test="owner!=null">
+            and ta.user_name=#{owner}
+        </if>
+        <if test="params.beginTime!=null and params.endTime!=null">
+            and tc.next_time > #{params.beginTime} and tc.next_time &lt; #{params.endTime}
+        </if>
+    </select>
+    <select id="getClueSummaryById" resultType="com.zjh.tienchin.clue.domain.vo.ClueSummary">
+        SELECT
+            tc.clue_id, tc.`name`,tch.channel_name,tc.phone,tc.`status`,tc.create_time,tc.create_by,ta.user_name as owner,tc.next_time
+        FROM
+            tienchin_clue tc
+                LEFT JOIN tienchin_channel tch
+                          ON tc.channel_id=tch.channel_id
+                LEFT JOIN tienchin_assignment as ta
+                          on tc.clue_id = ta.assign_id and ta.latest=TRUE WHERE tc.clue_id=#{clueId}
+    </select>
+    <select id="getClueDetailsByClueId" resultType="com.zjh.tienchin.clue.domain.vo.ClueDetails">
+        SELECT
+            tc.clue_id,tc.`name`,tc.gender,tc.age,tc.weixin,tc.qq,tc.phone,tc.`level`,tc.`subject`,tc.`status`,tc.fail_count,tc.next_time,
+            tch.channel_name,tas.create_by as allocator,ta.`name` as activity_name , ta.info as activity_info,tas.user_name as owner,tas.create_time as belong_time,tc.create_time
+        from
+            tienchin_clue tc
+                left join tienchin_channel tch on tc.channel_id = tch.channel_id
+                left join tienchin_activity ta on tc.activity_id = ta.activity_id
+                LEFT JOIN tienchin_assignment tas on tc.clue_id = tas.assign_id and tas.latest=TRUE
+        where tc.clue_id = #{clueId}
+    </select>
+</mapper>
